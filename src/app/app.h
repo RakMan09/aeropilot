@@ -14,10 +14,10 @@
 /* Task priorities (higher number = higher priority). The watchdog is the
  * highest-priority application task so it always runs to catch stalls. */
 #define PRIO_WATCHDOG   (configMAX_PRIORITIES - 1) /* 7 */
-#define PRIO_SENSOR     4
+#define PRIO_SENSOR     5
+#define PRIO_TELEMETRY  4  /* safety-relevant: must report even if app stalls */
 #define PRIO_FUSION     3
 #define PRIO_STATE      3
-#define PRIO_TELEMETRY  2
 
 /* Task periods. Sensor drives the sim clock at 100 Hz of simulated time. */
 #define SENSOR_PERIOD_MS     10
