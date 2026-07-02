@@ -1,0 +1,12 @@
+/build/
+/build-*/
+*.o
+*.obj
+*.elf
+*.map
+*.bin
+__pycache__/
+*.pyc
+/telemetry.bin
+/out.png
+.venv/
