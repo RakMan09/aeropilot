@@ -1,6 +1,7 @@
 #include "sim/rocket_sim.h"
 
 #include <math.h>
+#include <stddef.h>
 
 /* Simple, deterministic linear-congruential PRNG so that noisy runs are
  * exactly reproducible across host and target builds. */
@@ -81,6 +82,9 @@ void rocket_sim_advance(rocket_sim_t *sim, float dt)
 {
     if (sim->landed)
     {
+        /* Keep the mission clock running while resting on the ground so
+         * downstream timestamps (and thus the fusion dt) stay well-defined. */
+        sim->t += dt;
         return;
     }
 
