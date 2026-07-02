@@ -62,6 +62,17 @@ void state_machine_task(void *arg)
             {
                 printf("[sm] LANDED. apogee=%.1fm deploy@t=%.2fs\n",
                        (double)sm.max_altitude, (double)sm.deploy_time);
+
+                /* Report deterministic scheduler timing (RTOS ticks). */
+                unsigned expected =
+                    (unsigned)pdMS_TO_TICKS(SENSOR_PERIOD_MS);
+                printf("[metrics] sensor period target=%u ticks; "
+                       "min=%u max=%u; worst-case jitter=%u tick(s) "
+                       "over %u samples\n",
+                       expected, (unsigned)g_period_min_cyc,
+                       (unsigned)g_period_max_cyc, (unsigned)g_jitter_max_cyc,
+                       (unsigned)g_jitter_samples);
+
                 vTaskDelay(pdMS_TO_TICKS(200)); /* flush final telemetry */
                 printf("FLIGHT COMPLETE\n");
                 qemu_exit(0);

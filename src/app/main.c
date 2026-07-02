@@ -8,6 +8,10 @@ QueueHandle_t g_estimate_queue;
 shared_state_t g_shared;
 volatile uint32_t g_checkin[WDT_COUNT];
 volatile int g_fault_requested;
+volatile uint32_t g_jitter_samples;
+volatile uint32_t g_period_min_cyc;
+volatile uint32_t g_period_max_cyc;
+volatile uint32_t g_jitter_max_cyc;
 
 void qemu_exit(int code)
 {
