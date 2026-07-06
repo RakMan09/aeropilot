@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AeroPilot &mdash; Ground Station</title>
+<meta name="description" content="Interactive replay of real telemetry from the AeroPilot flight computer (FreeRTOS on QEMU)." />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">&#9650;</span>
+    <div>
+      <h1>AeroPilot <span class="dim">Ground Station</span></h1>
+      <p class="tagline">Live replay of telemetry decoded from a FreeRTOS / QEMU flight computer</p>
+    </div>
+  </div>
+  <div class="mission-clock">
+    <div class="clock-label">MISSION TIME</div>
+    <div id="clock" class="clock-value">T+00.00s</div>
+  </div>
+</header>
+
+<section class="controls">
+  <div class="control-group">
+    <label>Flight</label>
+    <select id="dataset">
+      <option value="data/flight_nominal.json">Nominal flight</option>
+      <option value="data/flight_fault.json">Fault injection &rarr; SAFE</option>
+    </select>
+  </div>
+  <div class="control-group buttons">
+    <button id="play" class="btn primary">&#9658; Launch</button>
+    <button id="restart" class="btn">&#8635; Restart</button>
+  </div>
+  <div class="control-group">
+    <label>Speed</label>
+    <div class="speeds" id="speeds">
+      <button data-speed="1">1&times;</button>
+      <button data-speed="2" class="active">2&times;</button>
+      <button data-speed="4">4&times;</button>
+    </div>
+  </div>
+  <div class="control-group grow">
+    <input id="scrub" type="range" min="0" max="1000" value="0" />
+  </div>
+</section>
+
+<main class="grid">
+  <div class="panel charts">
+    <div class="chart-block">
+      <div class="chart-title"><span>ALTITUDE</span><span id="alt-now" class="chart-now">0.0 m</span></div>
+      <canvas id="altChart"></canvas>
+    </div>
+    <div class="chart-block">
+      <div class="chart-title"><span>VERTICAL VELOCITY</span><span id="vel-now" class="chart-now">0.0 m/s</span></div>
+      <canvas id="velChart"></canvas>
+    </div>
+  </div>
+
+  <aside class="panel sidebar">
+    <div class="state-hero">
+      <div class="hero-label">FLIGHT STATE</div>
+      <div id="state-name" class="hero-state">IDLE</div>
+    </div>
+
+    <div class="state-strip" id="stateStrip"></div>
+
+    <div class="readouts">
+      <div class="readout"><span class="r-label">Altitude</span><span id="r-alt" class="r-val">0.0 m</span></div>
+      <div class="readout"><span class="r-label">Velocity</span><span id="r-vel" class="r-val">0.0 m/s</span></div>
+      <div class="readout"><span class="r-label">Battery</span><span id="r-batt" class="r-val">--</span></div>
+      <div class="readout"><span class="r-label">Parachute</span><span id="r-deploy" class="r-val">STOWED</span></div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><span id="m-apogee">--</span><label>Apogee (obs)</label></div>
+      <div class="metric"><span id="m-error">--</span><label>Apogee error</label></div>
+      <div class="metric"><span id="m-frames">--</span><label>Frames OK</label></div>
+      <div class="metric"><span id="m-bad">--</span><label>CRC/parity rejects</label></div>
+    </div>
+
+    <div class="event-log" id="eventLog">
+      <div class="log-title">EVENT LOG</div>
+      <ul id="logList"></ul>
+    </div>
+  </aside>
+</main>
+
+<footer class="footer">
+  <span>This dashboard replays <strong>real telemetry</strong> &mdash; a FreeRTOS flight image was run on an emulated ARM Cortex-M3 (QEMU <code>mps2-an385</code>), the CRC-protected ARINC-429 stream was decoded on the ground, and exported to JSON.</span>
+  <a id="repoLink" href="#" target="_blank" rel="noopener">View source on GitHub</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

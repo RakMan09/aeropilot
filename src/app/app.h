@@ -58,6 +58,14 @@ extern shared_state_t g_shared;
 extern volatile uint32_t g_checkin[WDT_COUNT];
 extern volatile int g_fault_requested;
 
+/* Scheduler jitter metrics for the periodic sensor task, in CPU cycles
+ * (25 MHz -> 40 ns/cycle). Populated by the sensor task via the DWT cycle
+ * counter and reported at flight end. */
+extern volatile uint32_t g_jitter_samples;
+extern volatile uint32_t g_period_min_cyc;
+extern volatile uint32_t g_period_max_cyc;
+extern volatile uint32_t g_jitter_max_cyc;
+
 static inline void app_checkin(int idx)
 {
     g_checkin[idx]++;

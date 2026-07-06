@@ -19,6 +19,9 @@ endif()
 
 message(STATUS "AeroPilot build type: ${AEROPILOT_BUILD}")
 
+# Optional gcov instrumentation for host-test coverage reporting.
+option(AEROPILOT_COVERAGE "Instrument the host build for gcov coverage" OFF)
+
 # ---------------------------------------------------------------------------
 # Portable core library: physics sim, fusion, protocol, state machine.
 # Contains no RTOS dependency so it links into both the firmware and tests.
@@ -42,6 +45,12 @@ target_include_directories(aeropilot_core PUBLIC src)
 target_compile_options(aeropilot_core PRIVATE -Wall -Wextra)
 if(NOT CMAKE_CROSSCOMPILING)
     target_link_libraries(aeropilot_core PUBLIC m)
+endif()
+
+if(AEROPILOT_COVERAGE)
+    # Propagate coverage flags to the core and everything that links it (tests).
+    target_compile_options(aeropilot_core PUBLIC --coverage -O0 -g)
+    target_link_options(aeropilot_core PUBLIC --coverage)
 endif()
 
 if(AEROPILOT_BUILD STREQUAL "firmware")

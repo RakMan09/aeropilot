@@ -1,0 +1,14 @@
+{
+  "name": "AeroPilot",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12" }
+  },
+  "onCreateCommand": "sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi qemu-system-arm cppcheck cmake && pip3 install --break-system-packages matplotlib && git submodule update --init --recursive",
+  "postAttachCommand": "echo 'AeroPilot ready. Run:  ./scripts/demo.sh   (build + fly on QEMU + decode telemetry)'",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-vscode.cpptools", "ms-python.python", "ms-vscode.cmake-tools"]
+    }
+  }
+}
