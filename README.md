@@ -16,6 +16,25 @@ On a simulated launch AeroPilot:
 - streams **CRC-protected telemetry** over a simulated **ARINC-429** avionics
   bus to a ground station that replays the whole flight.
 
+## Live demo
+
+An interactive **ground-station dashboard** replays real decoded telemetry in
+the browser (altitude/velocity charts, live flight-state, apogee + parachute
+markers, and a nominal-vs-fault "watchdog &rarr; SAFE" toggle). It is a static
+site published via GitHub Pages and rebuilt from an actual QEMU flight on every
+push to `main`.
+
+- Live: `https://<your-github-user>.github.io/aeropilot/`
+- Source: [`web/`](web/); replay data in [`web/data/`](web/data/)
+
+![AeroPilot ground-station dashboard](docs/dashboard.png)
+
+> Enabling Pages (one-time): in the repo, go to **Settings &rarr; Pages** and set
+> **Source = GitHub Actions**. The [`Deploy ... to Pages`](.github/workflows/pages.yml)
+> workflow then builds the firmware, flies it on QEMU, decodes the telemetry to
+> JSON, and deploys the dashboard. You can also trigger it manually from the
+> **Actions** tab (Run workflow).
+
 ## Architecture
 
 ```mermaid
@@ -101,7 +120,20 @@ python3 groundstation/decode.py --file /tmp/telemetry.bin --plot out.png --check
 
 It validates word parity + frame CRC, re-synchronises after corruption,
 prints the state sequence and observed apogee, and writes a plot of
-altitude / vertical velocity / flight state.
+altitude / vertical velocity / flight state. Add `--json out.json` to export
+the decoded flight for the web dashboard.
+
+### Run the dashboard locally
+
+```bash
+# regenerate the replay data from a flight (optional; snapshots are committed)
+python3 groundstation/decode.py --file /tmp/telemetry.bin --true-apogee 106.6 \
+  --label "Nominal flight" --json web/data/flight_nominal.json
+
+# serve the static dashboard
+python3 -m http.server 8099 --directory web
+# open http://localhost:8099/
+```
 
 ## Run the tests
 

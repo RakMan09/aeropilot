@@ -1,0 +1,71 @@
+name: Deploy ground-station dashboard to Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi qemu-system-arm cmake
+
+      - name: Build firmware (nominal + fault-injection)
+        run: |
+          cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi.cmake \
+            -DAEROPILOT_BUILD=firmware
+          cmake --build build
+          cmake -B build-hang -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi.cmake \
+            -DAEROPILOT_BUILD=firmware -DAEROPILOT_INJECT_HANG=1.5
+          cmake --build build-hang
+
+      - name: Fly on QEMU and decode telemetry to JSON
+        run: |
+          timeout 120 qemu-system-arm -M mps2-an385 -cpu cortex-m3 \
+            -kernel build/aeropilot.elf -display none -monitor none \
+            -serial stdio -serial file:nom.bin -semihosting > /dev/null || true
+          timeout 60 qemu-system-arm -M mps2-an385 -cpu cortex-m3 \
+            -kernel build-hang/aeropilot.elf -display none -monitor none \
+            -serial stdio -serial file:hang.bin -semihosting > /dev/null || true
+          python3 groundstation/decode.py --file nom.bin --true-apogee 106.6 \
+            --label "Nominal flight" --json web/data/flight_nominal.json
+          python3 groundstation/decode.py --file hang.bin \
+            --label "Fault injection (fusion hang -> watchdog SAFE)" \
+            --json web/data/flight_fault.json
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
