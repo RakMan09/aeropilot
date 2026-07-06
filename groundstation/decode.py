@@ -11,6 +11,7 @@ Usage:
                                    [--true-apogee 106.6] [--check]
 """
 import argparse
+import json
 import struct
 import sys
 
@@ -159,6 +160,49 @@ def plot_flight(frames, out_path, telemetry_period_s):
     print(f"[gs] wrote plot to {out_path}")
 
 
+def write_json(path, frames, stats, period, apogee, apogee_frame, deployed,
+               safe, states_seen, true_apogee, label):
+    """Serialise the decoded flight to a compact JSON for the web dashboard."""
+    out_frames = []
+    for f in frames:
+        out_frames.append({
+            "seq": f["seq"],
+            "t": round(f["seq"] * period, 4),
+            "state": f["state"],
+            "state_name": STATE_NAMES[f["state"]]
+            if f["state"] < len(STATE_NAMES) else "UNKNOWN",
+            "alt": round(f["alt"], 3),
+            "vel": round(f["vel"], 3),
+            "batt_mv": f["batt_mv"],
+            "deployed": bool(f["flags"] & FLAG_DEPLOYED),
+            "safe": bool(f["flags"] & FLAG_SAFE),
+        })
+
+    deploy_frame = next((f for f in out_frames if f["deployed"]), None)
+    meta = {
+        "label": label,
+        "telemetry_period_s": period,
+        "frames_ok": stats.frames_ok,
+        "frames_bad": stats.frames_bad,
+        "words_total": stats.words_total,
+        "words_bad": stats.words_bad,
+        "observed_apogee_m": round(apogee, 2),
+        "apogee_seq": apogee_frame["seq"],
+        "apogee_t": round(apogee_frame["seq"] * period, 3),
+        "true_apogee_m": true_apogee,
+        "apogee_error_m": round(apogee - true_apogee, 2)
+        if true_apogee is not None else None,
+        "deployed": deployed,
+        "deploy_t": deploy_frame["t"] if deploy_frame else None,
+        "safe": safe,
+        "state_sequence": [STATE_NAMES[s] for s in states_seen],
+        "duration_s": round(out_frames[-1]["t"], 2) if out_frames else 0.0,
+    }
+
+    with open(path, "w") as fh:
+        json.dump({"meta": meta, "frames": out_frames}, fh)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="AeroPilot telemetry ground station")
     ap.add_argument("--file", required=True, help="telemetry byte stream file")
@@ -167,6 +211,10 @@ def main(argv=None):
                     help="true apogee altitude (m) for accuracy reporting")
     ap.add_argument("--telemetry-period", type=float, default=0.05,
                     help="telemetry frame period in seconds (for time axis)")
+    ap.add_argument("--json", dest="json_out",
+                    help="write decoded telemetry + summary as JSON")
+    ap.add_argument("--label", default="",
+                    help="human label stored in the JSON metadata")
     ap.add_argument("--check", action="store_true",
                     help="exit non-zero unless a nominal flight is decoded")
     args = ap.parse_args(argv)
@@ -207,6 +255,12 @@ def main(argv=None):
         err = apogee - args.true_apogee
         print(f"[gs] apogee error:    {err:+.1f} m vs true "
               f"{args.true_apogee:.1f} m")
+
+    if args.json_out:
+        write_json(args.json_out, frames, stats, args.telemetry_period,
+                   apogee, apogee_frame, deployed, safe, states_seen,
+                   args.true_apogee, args.label)
+        print(f"[gs] wrote JSON to {args.json_out}")
 
     if args.plot:
         plot_flight(frames, args.plot, args.telemetry_period)
