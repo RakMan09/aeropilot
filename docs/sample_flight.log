@@ -1,0 +1,12 @@
+
+=== AeroPilot flight computer (FreeRTOS/QEMU mps2-an385) ===
+[sm] armed; awaiting launch
+[sm] ARMED -> BOOST @ t=0.03s alt=-0.1m vel=1.2m/s
+[sm] BOOST -> COAST @ t=1.04s alt=30.2m vel=53.4m/s
+[sm] COAST -> APOGEE @ t=4.67s alt=106.6m vel=-0.4m/s
+[sm] DEPLOY parachute @ t=4.67s alt=106.6m
+[sm] APOGEE -> DESCENT @ t=4.73s alt=106.5m vel=-1.0m/s
+[sm] DESCENT -> LANDED @ t=15.25s alt=-6.4m vel=-0.5m/s
+[sm] LANDED. apogee=106.6m deploy@t=4.67s
+[metrics] sensor period target=10 ticks; min=10 max=10; worst-case jitter=0 tick(s) over 1524 samples
+FLIGHT COMPLETE
