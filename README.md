@@ -1,8 +1,37 @@
 # AeroPilot
 
+[![CI](https://github.com/rakman09/aeropilot/actions/workflows/ci.yml/badge.svg)](https://github.com/rakman09/aeropilot/actions/workflows/ci.yml)
+[![Pages](https://github.com/rakman09/aeropilot/actions/workflows/pages.yml/badge.svg)](https://github.com/rakman09/aeropilot/actions/workflows/pages.yml)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/rakman09/aeropilot)
+
 A deterministic **model-rocket flight computer** written in C on **FreeRTOS**,
 simulated end-to-end on **QEMU** (ARM Cortex-M3 `mps2-an385`) so it needs **no
 hardware**, plus a Python **ground station** that decodes and plots the flight.
+
+![AeroPilot flight replay](docs/flight.gif)
+
+## Results at a glance
+
+| Metric | Value |
+|--------|-------|
+| Apogee-detection error (vs. simulated truth) | **0.01 m** (~0.01%) |
+| Scheduler jitter (100 Hz sensor task, ~1,500 samples) | **0 ticks** (deterministic) |
+| Fault-detection to SAFE state | **&le; ~300 ms** (3 &times; watchdog period) |
+| Telemetry frames decoded / CRC errors (nominal) | **309 / 0** |
+| Bad words+frames rejected under 300-bit corruption | **100%** (flight still reconstructed) |
+| Host unit/scenario tests | **70 cases, 11 suites** |
+| Core line coverage (gcov) | **96.7%** (98.0% functions) |
+| Static analysis (cppcheck warning/perf/portability) | **0 warnings** |
+| Firmware C source | **~1,800 LOC** |
+
+Numbers are reproduced on every CI run; see [`docs/metrics.md`](docs/metrics.md).
+
+## Run it yourself
+
+- **One click:** open the repo in **GitHub Codespaces** (badge above), then run
+  `./scripts/demo.sh` &mdash; it builds the firmware, flies it on QEMU, and decodes
+  the telemetry (writes `flight.png`). The devcontainer preinstalls the toolchain.
+- **Locally:** see [Build & run the flight](#build--run-the-flight-firmware-on-qemu) below.
 
 On a simulated launch AeroPilot:
 
