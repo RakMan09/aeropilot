@@ -22,6 +22,35 @@
   </div>
 </header>
 
+<section class="about">
+  <div class="about-card">
+    <h2>What is this?</h2>
+    <p><strong>AeroPilot</strong> is the flight-computer software for a model
+    rocket &mdash; run entirely in simulation. A <strong>FreeRTOS</strong>
+    firmware image executes on an <strong>emulated ARM Cortex-M3</strong> (QEMU),
+    "flies" a simulated launch, decides when to deploy the parachute, and radios
+    telemetry down to this ground station. No physical hardware is involved.</p>
+    <p>This page <strong>replays the actual telemetry</strong> the firmware
+    transmitted: each reading was packed into a CRC-protected frame, sent over a
+    simulated <strong>ARINC-429</strong> avionics bus, decoded here on the
+    ground, and exported to JSON. Pick a flight and press
+    <em>Launch</em> to watch it unfold.</p>
+  </div>
+  <div class="about-card">
+    <h3>What you're seeing</h3>
+    <ul class="legend">
+      <li><span class="dot" style="background:#35c9e6"></span><strong>Altitude</strong> &amp; <strong>vertical velocity</strong> estimated onboard by a Kalman filter</li>
+      <li><span class="dot" style="background:#d977ff"></span><strong>Apogee</strong> &mdash; the peak of the flight, where velocity crosses zero</li>
+      <li><span class="dot" style="background:#3ddc84"></span><strong>Deploy</strong> &mdash; the parachute-release command</li>
+      <li><span class="dot" style="background:#ff4d5e"></span><strong>SAFE</strong> &mdash; the watchdog caught a hung task and failed safe</li>
+    </ul>
+    <p class="hint">The side panel shows the live flight state, telemetry
+    readouts, and bus-integrity stats (frames decoded, CRC/parity rejects).
+    Switch to the <strong>Fault injection</strong> flight to watch the watchdog
+    trip to SAFE.</p>
+  </div>
+</section>
+
 <section class="controls">
   <div class="control-group">
     <label>Flight</label>
