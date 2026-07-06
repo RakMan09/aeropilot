@@ -36,6 +36,17 @@ jobs:
           cmake --build build-host
           ctest --test-dir build-host --output-on-failure
 
+      - name: Measure core coverage (gcov, fail under 90%)
+        run: |
+          pip3 install --user gcovr
+          cmake -B build-cov -DAEROPILOT_BUILD=host_tests \
+            -DAEROPILOT_COVERAGE=ON -DCMAKE_C_COMPILER=gcc
+          cmake --build build-cov
+          ctest --test-dir build-cov
+          ~/.local/bin/gcovr --root . --filter 'src/' \
+            --exclude 'src/app/' --exclude 'src/tasks/' \
+            --fail-under-line 90 --print-summary
+
       - name: Build firmware
         run: |
           cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi.cmake \
